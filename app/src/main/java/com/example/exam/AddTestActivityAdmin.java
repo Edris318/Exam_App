@@ -40,7 +40,7 @@ public class AddTestActivityAdmin extends AppCompatActivity {
     TestInfo testInfo;
     Query query;
     ListenerRegistration listenerRegistration;
-    FirebaseAuth auth;
+    
 
 
     @Override
@@ -56,7 +56,6 @@ public class AddTestActivityAdmin extends AppCompatActivity {
         testListItems = new ArrayList<>();
         adapter = new TestInfoAdapter(this, testListItems);
         auth = FirebaseAuth.getInstance();
-        // str = auth.getUid();
 
 
         recyclerView2.setLayoutManager(new LinearLayoutManager(this));
