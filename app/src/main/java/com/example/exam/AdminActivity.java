@@ -51,6 +51,7 @@ public class AdminActivity extends AppCompatActivity {
     AdminRecAdapter recAdapter; // Declare recAdapter here
     FirebaseFirestore db;
     ArrayList<Quiz> quizList;
+    String catId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,7 +142,7 @@ public class AdminActivity extends AppCompatActivity {
                         long catCount = catListDocs.getLong("COUNT");
 
                         for (int i = 1; i <= catCount; i++) {
-                            String catId = catListDocs.getString("CAT" + String.valueOf(i) + "_ID");
+                             catId = catListDocs.getString("CAT" + String.valueOf(i) + "_ID");
                             QueryDocumentSnapshot catDoc = docList.get(catId);
                             int noOFTest = catDoc.getLong("NO_OF_TESTS").intValue();
                             String name = catDoc.getString("NAME");
@@ -167,7 +168,7 @@ public class AdminActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getApplicationContext(), UploadCategoryActivity.class));
-                finish();
+                //finish();
             }
         });
     }
