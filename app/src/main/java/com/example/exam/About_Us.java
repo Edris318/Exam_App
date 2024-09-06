@@ -29,7 +29,7 @@ public class About_Us extends AppCompatActivity {
 
         Element adsElement = new Element();
         View aboutPage = new AboutPage(this)
-                .isRTL(false)
+                .isRTL(true)
                 .setImage(R.drawable.ic_launcher_round_score)
                 .setDescription(getResources().getString(R.string.description_app))
                 .addItem(new Element().setTitle("Version 1.1"))
@@ -39,6 +39,7 @@ public class About_Us extends AppCompatActivity {
                 .addPlayStore("com.example.exam")   //Replace all this with your package name
                 .addInstagram("edris_keyana")    //Your instagram id
                 .addItem(createCopyright())
+                .addGitHub("https://github.com/Edris318","Edris Sharifi")
                 .create();
         setContentView(aboutPage);
     }
@@ -47,9 +48,9 @@ public class About_Us extends AppCompatActivity {
         Element copyright = new Element();
         @SuppressLint("DefaultLocale") final String copyrightString = String.format("Copyright %d & Developed by Edris Keyana", Calendar.getInstance().get(Calendar.YEAR));
         copyright.setTitle(copyrightString);
-        //copyright.setIcon(R.mipmap.ic_launcher);
+        copyright.setIconDrawable(R.drawable.ic_right);
         copyright.setGravity(Gravity.CENTER);
-       // copyright.setGravity(Gravity.START);
+        copyright.setGravity(Gravity.START);
         copyright.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

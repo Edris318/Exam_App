@@ -35,8 +35,8 @@ public class TestInfoAdapter extends RecyclerView.Adapter<TestInfoAdapter.TestIn
     @Override
     public void onBindViewHolder(@NonNull TestInfoViewHolder holder, int position) {
         TestInfo currentTest = testInfoList.get(position);
-        holder.testIdTextView.setText("Test " + currentTest.getTEST_ID());
-        holder.testTimeTextView.setText("Time: " + currentTest.getTEST_TIME());
+        holder.testIdTextView.setText("Test " + currentTest.getTestId());
+        holder.testTimeTextView.setText("Time: " + currentTest.getTestTime());
     }
 
     @Override
