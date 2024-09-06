@@ -1,6 +1,8 @@
 package com.example.exam;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -12,8 +14,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.exam.Adapters.TestInfoAdapter;
+import com.example.exam.Models.Quiz;
 import com.example.exam.Models.TestInfo;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,10 +29,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class AddTestActivityAdmin extends AppCompatActivity {
 
@@ -40,7 +47,6 @@ public class AddTestActivityAdmin extends AppCompatActivity {
     TestInfo testInfo;
     Query query;
     ListenerRegistration listenerRegistration;
-    
 
 
     @Override
@@ -55,14 +61,11 @@ public class AddTestActivityAdmin extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         testListItems = new ArrayList<>();
         adapter = new TestInfoAdapter(this, testListItems);
-        auth = FirebaseAuth.getInstance();
+//        auth = FirebaseAuth.getInstance();
 
 
         recyclerView2.setLayoutManager(new LinearLayoutManager(this));
         recyclerView2.setAdapter(adapter);
-
-
-
 
 
 //                db.collection("QUIZES").document(FirebaseAuth.getInstance().getUid())
@@ -73,35 +76,15 @@ public class AddTestActivityAdmin extends AppCompatActivity {
 //                            }
 //                        }).remove();
 
-         //selectFromDb();
-        // loadTestsList();
-    }
-
-    private void selectFromDb() {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        query = db.collectionGroup("QUIZES");
-        listenerRegistration = query.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                if (error != null) {
-                    Log.e("Firestore Error", error.getMessage());
-                    return;
-                }
-
-                testListItems.clear();
-                for (DocumentSnapshot document : value.getDocuments()) {
-                    TestInfo testInfo1 = document.toObject(TestInfo.class);
-                    testListItems.add(testInfo1);
-                }
-                adapter.notifyDataSetChanged();
-            }
-        });
+        String quizId = "gUEdZHXlAnnU3Du1F5DK";
+        selectFromDb(quizId);
+//         loadTestsList();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        listenerRegistration.remove();
+//        listenerRegistration.remove();
     }
 
     private void loadTestsList() {
@@ -116,10 +99,14 @@ public class AddTestActivityAdmin extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             testListItems.clear();
                             Toast.makeText(AddTestActivityAdmin.this, "Hiii", Toast.LENGTH_SHORT).show();
+
+                            List<DocumentSnapshot> dd = task.getResult().getDocuments();
                             for (DocumentSnapshot document : task.getResult()) {
                                 TestInfo testModel = document.toObject(TestInfo.class);
                                 testListItems.add(testModel);
                             }
+
+
                             adapter.notifyDataSetChanged();
                         } else {
                             Toast.makeText(AddTestActivityAdmin.this, task.getException().getMessage().toString(), Toast.LENGTH_SHORT).show();
@@ -129,7 +116,48 @@ public class AddTestActivityAdmin extends AppCompatActivity {
 
     }
 
+    private void selectFromDb(String quizId) {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        testListItems.clear();
+        db.collection("QUIZES").document(quizId).collection("TESTS_LIST").get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @SuppressLint("NotifyDataSetChanged")
+                    @Override
+                    public void onSuccess(QuerySnapshot testSnapshots) {
+                        if (testSnapshots.isEmpty()) {
+                            Log.e("FirestoreError", "No TESTS_LIST subcollection for quiz: " + quizId);
+                        } else {
+                            // Loop through each document in the TESTS_LIST sub-collection
+                            for (QueryDocumentSnapshot testDoc : testSnapshots) {
+                                if (testDoc.exists()) {
+                                    Map<String, Object> testData = testDoc.getData();
+                                    Log.d("TESTS_LAST_FIELDS", testData.size()+ " Fields for TESTS_LAST in quiz " + quizId + ": " + testData.toString());
+                                    for (int i = 1; i <= testData.size()/2; i++) {
+                                        String testId = "TEST" + String.valueOf(i) + "_ID";
+                                        String timeId = "TEST" + String.valueOf(i) + "_TIME";
+                                        String id = testData.get(testId).toString();
+                                        String time = testData.get(timeId).toString();
 
+                                        testListItems.add(new TestInfo(id, time));
+                                    }
+
+                                } else {
+                                    Log.e("FirestoreError", "Document does not exist in TESTS_LAST for quiz: " + quizId);
+                                }
+                            }
+                            adapter.notifyDataSetChanged();
+
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("FirestoreError", "Error fetching TESTS_LIST sub-collection for quiz: " + quizId, e);
+                    }
+                });
+
+    }
 
 
 }
